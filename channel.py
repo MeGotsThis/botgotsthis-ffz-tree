@@ -1,7 +1,7 @@
 ﻿import itertools
 from contextlib import suppress
 from datetime import timedelta
-from typing import List  # noqa: F401
+from typing import Dict, Optional, Set  # noqa: F401
 
 import bot
 from lib.data import ChatCommandArgs
@@ -11,7 +11,13 @@ from lib.helper.chat import min_args, permission_feature
 
 @permission_feature(('broadcaster', None), ('moderator', 'modtree'))
 async def commandTree(args: ChatCommandArgs) -> bool:
-    ffzEmotes: List[str] = list(args.chat.ffzEmotes.values())
+    if not await args.data.ffz_load_broadcaster_emotes(args.chat.channel):
+        return False
+    emotes: Optional[Dict[int, str]]
+    emotes = await args.data.ffz_get_broadcaster_emotes(args.chat.channel)
+    if emotes is None:
+        return False
+    ffzEmotes: Set[str] = set(emotes.values())
     if 'Neck2' not in ffzEmotes or 'Neck3' not in ffzEmotes:
         return False
 
@@ -38,7 +44,13 @@ async def commandTree(args: ChatCommandArgs) -> bool:
 @permission_feature(('broadcaster', None), ('moderator', 'modtree'))
 @min_args(2)
 async def commandTreeLong(args: ChatCommandArgs) -> bool:
-    ffzEmotes = args.chat.ffzEmotes.values()
+    if not await args.data.ffz_load_broadcaster_emotes(args.chat.channel):
+        return False
+    emotes: Optional[Dict[int, str]]
+    emotes = await args.data.ffz_get_broadcaster_emotes(args.chat.channel)
+    if emotes is None:
+        return False
+    ffzEmotes: Set[str] = set(emotes.values())
     if 'Neck2' not in ffzEmotes or 'Neck3' not in ffzEmotes:
         return False
 
